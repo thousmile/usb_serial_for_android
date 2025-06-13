@@ -21,18 +21,24 @@ class UsbSerial {
   static const String FTDI = "ftdi";
 
   static const MethodChannel _channel = MethodChannel('usb_serial_for_android');
-  static const EventChannel _eventChannel =
-      EventChannel('usb_serial_for_android/usb_events');
+
+  static const EventChannel _eventChannel = EventChannel(
+    'usb_serial_for_android/usb_events',
+  );
+
   static Stream<UsbEvent>? _eventStream;
 
-  static Future<UsbPort?> createFromDeviceId(int? deviceId,
-      [String? type, int? portNum]) async {
+  static Future<UsbPort?> createFromDeviceId(
+    int? deviceId, [
+    String? type,
+    int? portNum,
+  ]) async {
     String? methodChannelName = await _channel.invokeMethod("create", {
       "type": type,
       "vid": -1,
       "pid": -1,
       "deviceId": deviceId,
-      "portNum": portNum
+      "portNum": portNum,
     });
 
     if (methodChannelName == null) {
@@ -48,8 +54,9 @@ class UsbSerial {
   }
 
   static Stream<UsbEvent>? get usbEventStream {
-    _eventStream ??=
-        _eventChannel.receiveBroadcastStream().map<UsbEvent>((value) {
+    _eventStream ??= _eventChannel.receiveBroadcastStream().map<UsbEvent>((
+      value,
+    ) {
       UsbEvent msg = UsbEvent();
       msg.device = UsbDevice.fromJSON(value);
       msg.event = value["event"];

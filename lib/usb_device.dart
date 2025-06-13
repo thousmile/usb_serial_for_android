@@ -9,7 +9,9 @@ class UsbDevice {
 
   /// Product Id
   final int? pid;
+
   final String? productName;
+
   final String? manufacturerName;
 
   /// The device id is unique to this Usb Device until it is unplugged.
@@ -18,6 +20,7 @@ class UsbDevice {
 
   // save the device port
   UsbPort? _port;
+
   // port getter
   UsbPort? get port => _port;
 
@@ -27,19 +30,28 @@ class UsbDevice {
   /// The number of interfaces on this UsbPort
   final int? interfaceCount;
 
-  UsbDevice(this.deviceName, this.vid, this.pid, this.productName,
-      this.manufacturerName, this.deviceId, this.serial, this.interfaceCount);
+  UsbDevice(
+    this.deviceName,
+    this.vid,
+    this.pid,
+    this.productName,
+    this.manufacturerName,
+    this.deviceId,
+    this.serial,
+    this.interfaceCount,
+  );
 
   static UsbDevice fromJSON(dynamic json) {
     return UsbDevice(
-        json["deviceName"],
-        json["vid"],
-        json["pid"],
-        json["productName"],
-        json["manufacturerName"],
-        json["deviceId"],
-        json["serialNumber"],
-        json["interfaceCount"]);
+      json["deviceName"],
+      json["vid"],
+      json["pid"],
+      json["productName"],
+      json["manufacturerName"],
+      json["deviceId"],
+      json["serialNumber"],
+      json["interfaceCount"],
+    );
   }
 
   @override
@@ -59,14 +71,14 @@ class UsbDevice {
 
   @override
   bool operator ==(other) {
-    if (!(other is UsbDevice)) {
+    if (other is! UsbDevice) {
       return false;
     }
-    return this.deviceName == other.deviceName;
+    return deviceName == other.deviceName;
   }
 
   @override
   int get hashCode {
-    return this.deviceName.hashCode;
+    return deviceName.hashCode;
   }
 }

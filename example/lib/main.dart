@@ -11,21 +11,28 @@ import 'package:usb_serial_for_android/usb_serial_for_android.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   UsbPort? _port;
+
   String _status = "Idle";
+
   List<Widget> _ports = [];
-  List<Widget> _serialData = [];
+
+  final List<Widget> _serialData = [];
 
   StreamSubscription<String>? _subscription;
+
   Transaction<String>? _transaction;
+
   UsbDevice? _device;
 
-  TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   Future<bool> _connectTo(UsbDevice? device) async {
     _serialData.clear();
@@ -67,12 +74,18 @@ class _MyAppState extends State<MyApp> {
     await _port!.setDTR(true);
     await _port!.setRTS(true);
     await _port!.setPortParameters(
-        115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+      115200,
+      UsbPort.DATABITS_8,
+      UsbPort.STOPBITS_1,
+      UsbPort.PARITY_NONE,
+    );
 
     await _port!.connect();
 
     _transaction = Transaction.stringTerminated(
-        _port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
+      _port!.inputStream as Stream<Uint8List>,
+      Uint8List.fromList([13, 10]),
+    );
 
     _subscription = _transaction!.stream.listen((String line) {
       setState(() {
@@ -95,10 +108,9 @@ class _MyAppState extends State<MyApp> {
     if (!devices.contains(_device)) {
       _connectTo(null);
     }
-    print(devices);
-
-    devices.forEach((device) {
-      _ports.add(ListTile(
+    for (var device in devices) {
+      _ports.add(
+        ListTile(
           leading: Icon(Icons.usb),
           title: Text(device.productName!),
           subtitle: Text(device.manufacturerName!),
@@ -109,8 +121,10 @@ class _MyAppState extends State<MyApp> {
                 _getPorts();
               });
             },
-          )));
-    });
+          ),
+        ),
+      );
+    }
 
     setState(() {
       print(_ports);
@@ -137,45 +151,53 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-      appBar: AppBar(
-        title: const Text('USB Serial Plugin example app'),
-      ),
-      body: Center(
-          child: Column(children: <Widget>[
-        Text(
-            _ports.length > 0
-                ? "Available Serial Ports"
-                : "No serial devices available",
-            style: Theme.of(context).textTheme.headline6),
-        ..._ports,
-        Text('Status: $_status\n'),
-        Text('info: ${_port.toString()}\n'),
-        ListTile(
-          title: TextField(
-            controller: _textController,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Text To Send',
-            ),
-          ),
-          trailing: ElevatedButton(
-            child: Text("Send"),
-            onPressed: _port == null
-                ? null
-                : () async {
-                    if (_port == null) {
-                      return;
-                    }
-                    String data = _textController.text + "\r\n";
-                    await _port!.write(Uint8List.fromList(data.codeUnits));
-                    _textController.text = "";
-                  },
+      home: Scaffold(
+        appBar: AppBar(title: const Text('USB Serial Plugin example app')),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              Text(
+                _ports.isNotEmpty
+                    ? "Available Serial Ports"
+                    : "No serial devices available",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              ..._ports,
+              Text('Status: $_status\n'),
+              Text('info: ${_port.toString()}\n'),
+              ListTile(
+                title: TextField(
+                  controller: _textController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Text To Send',
+                  ),
+                ),
+                trailing: ElevatedButton(
+                  onPressed: _port == null
+                      ? null
+                      : () async {
+                          if (_port == null) {
+                            return;
+                          }
+                          String data = "${_textController.text}\r\n";
+                          await _port!.write(
+                            Uint8List.fromList(data.codeUnits),
+                          );
+                          _textController.text = "";
+                        },
+                  child: Text("Send"),
+                ),
+              ),
+              Text(
+                "Result Data",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              ..._serialData,
+            ],
           ),
         ),
-        Text("Result Data", style: Theme.of(context).textTheme.headline6),
-        ..._serialData,
-      ])),
-    ));
+      ),
+    );
   }
 }

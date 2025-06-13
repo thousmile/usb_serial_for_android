@@ -1,6 +1,7 @@
 import 'package:usb_serial_for_android/usb_device.dart';
 
 class UsbEvent {
+
   /// Event passed to usbEventStream when a USB device is attached.
   static const String ACTION_USB_ATTACHED =
       "android.hardware.usb.action.USB_DEVICE_ATTACHED";
